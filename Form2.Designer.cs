@@ -41,6 +41,9 @@
             this.lblAveWT = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.dgvGanttChart = new System.Windows.Forms.DataGridView();
+            this.lbDebugAT = new System.Windows.Forms.ListBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.lbDebugBT = new System.Windows.Forms.ListBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvGanttChart)).BeginInit();
             this.SuspendLayout();
             // 
@@ -50,9 +53,9 @@
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(112, 23);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(312, 33);
+            this.label1.Size = new System.Drawing.Size(309, 33);
             this.label1.TabIndex = 0;
-            this.label1.Text = "SRTF CPU Scheduling";
+            this.label1.Text = "SJRF CPU Scheduling";
             // 
             // lbProcessID
             // 
@@ -172,14 +175,47 @@
             this.dgvGanttChart.Location = new System.Drawing.Point(25, 285);
             this.dgvGanttChart.Name = "dgvGanttChart";
             this.dgvGanttChart.ReadOnly = true;
-            this.dgvGanttChart.Size = new System.Drawing.Size(473, 33);
+            this.dgvGanttChart.Size = new System.Drawing.Size(473, 58);
             this.dgvGanttChart.TabIndex = 16;
+            // 
+            // lbDebugAT
+            // 
+            this.lbDebugAT.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbDebugAT.FormattingEnabled = true;
+            this.lbDebugAT.ItemHeight = 20;
+            this.lbDebugAT.Location = new System.Drawing.Point(530, 99);
+            this.lbDebugAT.Name = "lbDebugAT";
+            this.lbDebugAT.Size = new System.Drawing.Size(105, 124);
+            this.lbDebugAT.TabIndex = 17;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(607, 76);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(57, 20);
+            this.label7.TabIndex = 18;
+            this.label7.Text = "Debug";
+            // 
+            // lbDebugBT
+            // 
+            this.lbDebugBT.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbDebugBT.FormattingEnabled = true;
+            this.lbDebugBT.ItemHeight = 20;
+            this.lbDebugBT.Location = new System.Drawing.Point(641, 99);
+            this.lbDebugBT.Name = "lbDebugBT";
+            this.lbDebugBT.Size = new System.Drawing.Size(105, 124);
+            this.lbDebugBT.TabIndex = 19;
             // 
             // Computations
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(524, 359);
+            this.ClientSize = new System.Drawing.Size(780, 367);
+            this.Controls.Add(this.lbDebugBT);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.lbDebugAT);
             this.Controls.Add(this.dgvGanttChart);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.lblAveWT);
@@ -219,5 +255,8 @@
         private System.Windows.Forms.Label lblAveWT;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.DataGridView dgvGanttChart;
+        private System.Windows.Forms.ListBox lbDebugAT;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ListBox lbDebugBT;
     }
 }

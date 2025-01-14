@@ -1,156 +1,309 @@
-﻿    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Drawing;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Windows.Forms;
-    using System.Xml.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml.Linq;
 
-    namespace SRTFPractice
+namespace SRTFPractice
+{
+    public partial class Computations : Form
     {
-        public partial class Computations : Form
+        //Comment Code: Ctrl + K, Ctrl + C
+        //Uncomment Code: Ctrl + K, Ctrl + U
+
+        public static List<int> listAT;
+        public static List<int> listBT;
+
+        public static List<string> listProcessID = new List<string>();
+        public static List<string> processID = new List<string>();
+
+        //No.Of Ms Process Executed
+        public static List<int> listNMPE = new List<int>();
+        public static List<int> TotalWT = new List<int>();
+        public Computations()
         {
-            //NOTE: KAPAG SAME NG VALUE YUNG BURST TIME MAG DEDEPENDE SA ARRIVAL TIME
-            //NOTE: NAKUHA NA LAHAT NG ARRIVAL TIME AT BURST TIME, NEED NA LANG YUNG LOGIC NG GANTT CHART
-            //TODO: YUNG LOGIC NG GANTT CHART
+            InitializeComponent();
+        }
 
-            //Comment Code: Ctrl + K, Ctrl + C
-            //Uncomment Code: Ctrl + K, Ctrl + U
-            public Computations()
+        private void Computations_Load(object sender, EventArgs e)
+        {
+            listAT = new List<int>(SRTFMain.ArrivalTime);
+            listBT = new List<int>(SRTFMain.BurstTime);
+
+            getProcessID();
+            showInputs();
+
+            getLowestToHighest();
+
+            debug();
+
+            showGanttChart();
+        }
+
+        public void getProcessID()
+        {
+            for (int i = 0; i < listAT.Count; i++)
             {
-                InitializeComponent();
+                listProcessID.Add("P" + (i + 1));
             }
+        }
 
-            int[] listBTIndex = new int[4];
-            int[] listBTValue = new int[4];
-
-            private void Computations_Load(object sender, EventArgs e)
+        //i-a-arrange yung Arrival Time in ascending order
+        //kase yung lowest AT yung unang pinaprocess
+        public void getLowestToHighest()
+        {
+            // Sorting listAT with consideration of listBT
+            for (int i = 0; i < listAT.Count; i++)
             {
-
-                newArrivalTime = new List<int>(SRTFMain.ArrivalTime);
-
-                 DataTable dt = new DataTable();
-                //Process ID
-                for (int i = 1; i <= 4; i++) 
+                for (int j = i + 1; j < listAT.Count; j++)
                 {
-                    lbProcessID.Items.Add($"P{i}");
-                }
-                //Arrival Time
-                foreach (int AT in SRTFMain.ArrivalTime)
-                {
-                    lbArrivalTime.Items.Add(AT);
-                }
-                //Burst Time
-                foreach (int BT in SRTFMain.BurstTime)
-                {
-                    lbBurstTime.Items.Add(BT);
-                }
-                //Waiting Time
-
-                //Formula of Waiting Time: WT = Total WT - No. MS Process Executed - AT
-
-
-                //kukunin ko muna burst time ng lahat
-                int smallest = GetLowest();
-                listBTIndex[0] = GetBurstTime(smallest);
-                MessageBox.Show("Smallest BT: " + SRTFMain.BurstTime[listBTIndex[0]]);
-
-                int secondSmallest = GetLowest();
-                listBTIndex[1] = GetBurstTime(secondSmallest);
-                MessageBox.Show("2nd Smallest BT: " + SRTFMain.BurstTime[listBTIndex[1]]);
-
-                int thirdSmallest = GetLowest();
-                listBTIndex[2] = GetBurstTime(thirdSmallest);
-                MessageBox.Show("3rd Smallest BT: " + SRTFMain.BurstTime[listBTIndex[2]]);
-
-                int highest = GetLowest();
-                listBTIndex[3] = GetBurstTime(highest);
-                MessageBox.Show("Highest BT: " + SRTFMain.BurstTime[listBTIndex[3]]);
-
-                //dt.Columns.Add(smallest.ToString(), typeof(int));
-
-                //if (SRTFMain.BurstTime[currentBurstTimeIndex] >= secondSmallest)
-                //{
-                //    dt.Columns.Add(secondSmallest.ToString(), typeof(int));
-                //    SRTFMain.BurstTime[currentBurstTimeIndex] -= secondSmallest;
-                //} else
-                //{
-                //    //not sure pa rito
-                //    dt.Columns.Add(SRTFMain.BurstTime[currentBurstTimeIndex].ToString(), typeof(int));
-                //}
-
-                //MessageBox.Show("Burst Time: " + SRTFMain.BurstTime[currentBurstTimeIndex]);
-
-                //dt.Columns.Add(secondSmallest.ToString(), typeof(int));
-                //dt.Columns.Add(thirdSmallest.ToString(), typeof(int));
-                //dt.Columns.Add(highest.ToString(), typeof(int));
-
-                //TODO: dapat malaman yung index ng smallest to highest sa original na List na Arrival Time
-
-                dgvGanttChart.DataSource = dt;
-
-                // Automatically resize the columns to fit content
-                //dgvGanttChart.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
-
-                // Remove unnecessary row headers
-                dgvGanttChart.RowHeadersVisible = false;
-            }
-
-            public static List<int> newArrivalTime;
-
-            //get lowest index ng pinakamaliit na burst time
-            public int GetLowest()
-            {
-                int smallest = newArrivalTime[0];
-
-                for (int i = 1; i < newArrivalTime.Count; i++)
-                {
-                    if (newArrivalTime[i] < smallest)
+                    // Compare arrival times
+                    if (listAT[i] > listAT[j] ||
+                       (listAT[i] == listAT[j] && listBT[i] > listBT[j]))
                     {
-                        smallest = newArrivalTime[i];
+                        // Swap listAT
+                        int tempAT = listAT[i];
+                        listAT[i] = listAT[j];
+                        listAT[j] = tempAT;
+
+                        // Swap corresponding listBT
+                        int tempBT = listBT[i];
+                        listBT[i] = listBT[j];
+                        listBT[j] = tempBT;
+
+                        // Swap corresponding listProcessID
+                        string tempPID = listProcessID[i];
+                        listProcessID[i] = listProcessID[j];
+                        listProcessID[j] = tempPID;
                     }
-              
                 }
+            }
  
-                newArrivalTime.Remove(smallest);
+        }
+    
 
-                return smallest;
-            }
-
-            public int GetBurstTime(int AT)
+        public void showInputs()
+        {
+            for (int i = 1; i <= 4; i++)
             {
-                int currentBurstTimeIndex = 0;
-
-                for (int j = 0; j < SRTFMain.ArrivalTime.Count; j++)
-                {
-                    if (AT == SRTFMain.ArrivalTime[j])
-                    {
-                        currentBurstTimeIndex = j;
-                        break;
-                    }
-                }
-
-                return currentBurstTimeIndex;   
+                lbProcessID.Items.Add("P" + i);
             }
-
-            public void compareDuplicateBT()
+            foreach (int AT in listAT)
             {
-                int num;
-
-                for (int i = 0; i < listBTIndex.Length; i++)
-                {
-                    num = SRTFMain.BurstTime[listBTIndex[i]];
-
-                    if (listBTIndex[i].Equals(num))
-                    {
-                        
-                    }
-                }
+                lbArrivalTime.Items.Add(AT);
+            }
+            foreach (int BT in listBT)
+            {
+                lbBurstTime.Items.Add(BT);
             }
 
         }
 
+        public void debug()
+        {
+            foreach (int AT in listAT)
+            {
+                lbDebugAT.Items.Add(AT.ToString());
+            }
+
+            foreach (int BT in listBT)
+            {
+                lbDebugBT.Items.Add(BT.ToString());
+            }
+        }
+
+        public static List<int> ganttChart = new List<int>();
+
+
+        public void showGanttChart()
+        {
+            bool continueRun = true;
+
+            if (listAT[0] == 0)
+            {
+                int difOne = 0, difTwo = 0, difThree = 0;
+                int[] maxGC = new int[8];
+
+                ganttChart.Add(0);
+                processID.Add(listProcessID[0]);
+
+                if (listBT[0] > listAT[1])
+                {
+                    difOne = listAT[1] - listAT[0];
+                    listBT[0] -= difOne;
+
+                    maxGC[0] = difOne - 0;
+                    ganttChart.Add(maxGC[0]);
+                    processID.Add(listProcessID[1]);
+
+                    listNMPE.Add(1);
+
+                }
+                else if (listAT[0] + listBT[0] == listAT[1])
+                {
+                   
+                    maxGC[0] = listAT[0] + listBT[0];
+                    ganttChart.Add(maxGC[0]);
+                    processID.Add(listProcessID[1]);
+
+
+                }
+
+                if (listBT[1] > listAT[2])
+                {
+                    difTwo = listAT[2] - listAT[1];
+                    listBT[1] -= difTwo;
+
+                    maxGC[1] = difOne + difTwo;
+                    ganttChart.Add(maxGC[1]);
+
+                    processID.Add(listProcessID[2]);
+                    listNMPE.Add(1);
+
+                }
+                else if (listAT[1] + listBT[1] == listAT[2])
+                {
+                    maxGC[1] = listAT[1] + listBT[1];
+
+                    ganttChart.Add(maxGC[1]);
+
+                    processID.Add(listProcessID[2]);
+                }
+
+                if (listBT[2] > listAT[3])
+                {
+                    difThree = listAT[3] - listAT[2];
+                    listBT[2] -= difThree;
+
+                    maxGC[2] = difOne + difTwo + difThree;
+                    ganttChart.Add(maxGC[2]);
+
+                    processID.Add(listProcessID[3]);
+
+                    listNMPE.Add(1);
+                }
+                else if (listAT[2] + listBT[2] == listAT[3])
+                {
+                    maxGC[2] = listAT[2] + listBT[2];
+                    ganttChart.Add(maxGC[2]);
+                    processID.Add(listProcessID[3]);
+
+
+                    maxGC[3] = listAT[3] + listBT[3];
+                    ganttChart.Add(maxGC[3]);
+
+       
+
+                    continueRun = false;
+                }
+
+                if (continueRun)
+                {
+
+                    if (!(listBT[3] >= listBT[2]
+                            && listBT[3] >= listBT[1]
+                            && listBT[3] >= listBT[0]))
+                    {
+                        listBT[3] -= 1;
+
+                        maxGC[3] += maxGC[2] + 1;
+                        ganttChart.Add(maxGC[3]);
+
+                        listNMPE.Add(1);
+
+                    }
+
+                    sortBurstTime();
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        maxGC[4 + i] += maxGC[3 + i] + listBT[i];
+                        ganttChart.Add(maxGC[4 + i]);
+
+                        processID.Add(listProcessID[i]);
+                  
+                    }
+
+                    getWaitingTime();
+                }
+
+                DataTable dt = new DataTable();
+
+                foreach (int gc in ganttChart)
+                {
+                    dt.Columns.Add(gc.ToString(), typeof(String));
+                }
+
+                dt.Rows.Add(processID.ToArray());
+
+                dgvGanttChart.DataSource = dt;
+
+                dgvGanttChart.RowHeadersVisible = false;
+                dgvGanttChart.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                dgvGanttChart.AllowUserToResizeColumns = true;
+
+                // Align all cells in the rightmost side (right-align text in columns)
+                foreach (DataGridViewColumn column in dgvGanttChart.Columns)
+                {
+                    column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                }
+
+                ganttChart.Clear();
+                listProcessID.Clear();
+                processID.Clear();
+            }
+        }
+
+        public void sortBurstTime()
+        {
+            for (int i = 0; i < listBT.Count; i++)
+            {
+                for (int j = i + 1; j < listBT.Count; j++)
+                {
+                    // Compare burst times
+                    if (listBT[i] > listBT[j]
+                            || (listBT[i] == listBT[j] && listAT[i] > listAT[j]))
+                    {
+                        // Swap listBT
+                        int tempBT = listBT[i];
+                        listBT[i] = listBT[j];
+                        listBT[j] = tempBT;
+
+                        // Swap corresponding listAT
+                        int tempAT = listAT[i];
+                        listAT[i] = listAT[j];
+                        listAT[j] = tempAT;
+
+                        string tempPID = listProcessID[i];
+                        listProcessID[i] = listProcessID[j];
+                        listProcessID[j] = tempPID;
+                    }
+                }
+            }
+        }
+
+        public void getWaitingTime()
+        {
+            for (int i = 0; i < processID.Count; i++)
+            {
+                for (int j = i + 1; j < processID.Count; j++)
+                {
+                    if (processID[i] == processID[j])
+                    {
+                        lbWaitingTime.Items.Add(ganttChart[j]);
+                        break; // Break the inner loop once a duplicate is found
+                    }
+                }
+            }
+        }
+        
+        //if P1 is equals sa lbngprocess ID
     }
+}
